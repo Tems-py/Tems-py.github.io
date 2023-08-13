@@ -39,8 +39,9 @@ class StickMan {
         this.color = color;
         this.x = x;
         this.y = y;
-        this.limbs = [30, 310, 330, 30]; // prawa ręka,  lewa ręka, prawa noga, lewa noga
+        this.limbs = [30, 330, 330, 30]; // prawa ręka,  lewa ręka, prawa noga, lewa noga
         this.speed = [0, 1] // speedX, speedY
+        this.rotateCooldown = 0;
     }
 
     draw() {
@@ -125,15 +126,15 @@ class StickMan {
                     collisions.push([j, Objects[i]]);
                 }
 
-                if (checkIfLinesIntersect(this.x, this.y, this.x + Math.sin(this.limbs[j] * pi180) * legLength, this.y + Math.cos(this.limbs[j] * pi180) * legLength, Objects[i].x, Objects[i].y, Objects[i].x, Objects[i].y + Objects[i].size[1])) {
+                else if (checkIfLinesIntersect(this.x, this.y, this.x + Math.sin(this.limbs[j] * pi180) * legLength, this.y + Math.cos(this.limbs[j] * pi180) * legLength, Objects[i].x, Objects[i].y, Objects[i].x, Objects[i].y + Objects[i].size[1])) {
                     collisions.push([j, Objects[i]]);
                 }
 
-                if (checkIfLinesIntersect(this.x, this.y, this.x + Math.sin(this.limbs[j] * pi180) * legLength, this.y + Math.cos(this.limbs[j] * pi180) * legLength, Objects[i].x + Objects[i].size[0], Objects[i].y, Objects[i].x + Objects[i].size[0], Objects[i].y + Objects[i].size[1])) {
+                else if (checkIfLinesIntersect(this.x, this.y, this.x + Math.sin(this.limbs[j] * pi180) * legLength, this.y + Math.cos(this.limbs[j] * pi180) * legLength, Objects[i].x + Objects[i].size[0], Objects[i].y, Objects[i].x + Objects[i].size[0], Objects[i].y + Objects[i].size[1])) {
                     collisions.push([j, Objects[i]]);
                 }
 
-                if (checkIfLinesIntersect(this.x, this.y, this.x + Math.sin(this.limbs[j] * pi180) * legLength, this.y + Math.cos(this.limbs[j] * pi180) * legLength, Objects[i].x, Objects[i].y + Objects[i].size[1], Objects[i].x + Objects[i].size[0], Objects[i].y + Objects[i].size[1])) {
+                else if (checkIfLinesIntersect(this.x, this.y, this.x + Math.sin(this.limbs[j] * pi180) * legLength, this.y + Math.cos(this.limbs[j] * pi180) * legLength, Objects[i].x, Objects[i].y + Objects[i].size[1], Objects[i].x + Objects[i].size[0], Objects[i].y + Objects[i].size[1])) {
                     collisions.push([j, Objects[i]]);
                 }
             }
@@ -145,48 +146,72 @@ class StickMan {
                     collisions.push([j + 2, Objects[i]]);
                 }
 
-                if (checkIfLinesIntersect(this.x + bodyEnd[0], this.y + bodyEnd[1], this.x + bodyEnd[0] + Math.sin(this.limbs[j + 2] * pi180) * legLength, this.y + Math.cos(this.limbs[j + 2] * pi180) * legLength + bodyEnd[1], Objects[i].x, Objects[i].y, Objects[i].x, Objects[i].y + Objects[i].size[1])) {
-                    collisions.push([j, Objects[i]]);
+                else if (checkIfLinesIntersect(this.x + bodyEnd[0], this.y + bodyEnd[1], this.x + bodyEnd[0] + Math.sin(this.limbs[j + 2] * pi180) * legLength, this.y + Math.cos(this.limbs[j + 2] * pi180) * legLength + bodyEnd[1], Objects[i].x, Objects[i].y, Objects[i].x, Objects[i].y + Objects[i].size[1])) {
+                    collisions.push([j + 2, Objects[i]]);
                 }
 
-                if (checkIfLinesIntersect(this.x + bodyEnd[0], this.y + bodyEnd[1], this.x + bodyEnd[0] + Math.sin(this.limbs[j + 2] * pi180) * legLength, this.y + Math.cos(this.limbs[j + 2] * pi180) * legLength + bodyEnd[1], Objects[i].x + Objects[i].size[0], Objects[i].y, Objects[i].x + Objects[i].size[0], Objects[i].y + Objects[i].size[1])) {
-                    collisions.push([j, Objects[i]]);
+                else if (checkIfLinesIntersect(this.x + bodyEnd[0], this.y + bodyEnd[1], this.x + bodyEnd[0] + Math.sin(this.limbs[j + 2] * pi180) * legLength, this.y + Math.cos(this.limbs[j + 2] * pi180) * legLength + bodyEnd[1], Objects[i].x + Objects[i].size[0], Objects[i].y, Objects[i].x + Objects[i].size[0], Objects[i].y + Objects[i].size[1])) {
+                    collisions.push([ j+ 2, Objects[i]]);
                 }
 
-                if (checkIfLinesIntersect(this.x + bodyEnd[0], this.y + bodyEnd[1], this.x + bodyEnd[0] + Math.sin(this.limbs[j + 2] * pi180) * legLength, this.y + Math.cos(this.limbs[j + 2] * pi180) * legLength + bodyEnd[1], Objects[i].x, Objects[i].y + Objects[i].size[1], Objects[i].x + Objects[i].size[0], Objects[i].y + Objects[i].size[1])) {
-                    collisions.push([j, Objects[i]]);
+                else if (checkIfLinesIntersect(this.x + bodyEnd[0], this.y + bodyEnd[1], this.x + bodyEnd[0] + Math.sin(this.limbs[j + 2] * pi180) * legLength, this.y + Math.cos(this.limbs[j + 2] * pi180) * legLength + bodyEnd[1], Objects[i].x, Objects[i].y + Objects[i].size[1], Objects[i].x + Objects[i].size[0], Objects[i].y + Objects[i].size[1])) {
+                    collisions.push([j + 2, Objects[i]]);
                 }
             }
-
-
         }
         return collisions;
     }
 
+    rotateLegs() {
+        if (this.limbs[2] > 330) {
+            this.limbs[2] -= 1;
+        }
+        if (this.limbs[2] < 330) {
+            this.limbs[2] += 1;
+        }
+
+        if (this.limbs[3] > 30) {
+            this.limbs[3] -= 1;
+        }
+        if (this.limbs[3] < 30) {
+            this.limbs[3] += 1;
+        }
+    }
+
     update() {
+        let collisions = this.checkCollision();
+        console.log(this.rotateCooldown)
         this.y += this.speed[1];
         this.x += this.speed[0];
-        let collisions = this.checkCollision();
         if (collisions.length === 0) {
             this.speed[1] += 0.01;
+            this.rotateCooldown += 1;
         }
         else {
+            StickMans[0].speed[0] = 0;
             if (collisions.length > 1){
                 this.speed[1] = 0;
+                this.rotateCooldown += 1;
             }
             else {
                 if (collisions[0][0] === "head"){
                     this.speed[1] = 0;
+                    this.rotateCooldown += 1;
                 } else {
                     if (this.limbs[collisions[0][0]] > 180){
-                        this.limbs[collisions[0][0]] -= this.speed[1] * 10;
+                        this.limbs[collisions[0][0]] -= 3;
                         this.speed[1] = 0;
+                        this.rotateCooldown = 0;
                     } else {
-                        this.limbs[collisions[0][0]] += this.speed[1] * 10;
+                        this.limbs[collisions[0][0]] += 3;
                         this.speed[1] = 0;
+                        this.rotateCooldown = 0;
                     }
                 }
             }
+        }
+        if (this.rotateCooldown > 100){
+            this.rotateLegs()
         }
     }
 
@@ -195,11 +220,25 @@ class StickMan {
 let stick = new StickMan("red", 100, 100);
 StickMans.push(stick);
 
-let object = new Object(100, 500, 50, 50, "blue");
+let object = new Object(100, 500, 550, 50, "blue");
 Objects.push(object);
 object = new Object(210, 85, 50, 50, "blue");
 Objects.push(object);
 
+function handleStickMovement() {
+    if (keysDown.includes("a")) {
+        StickMans[0].speed[0] = -1;
+    }
+    if (keysDown.includes("d")) {
+        StickMans[0].speed[0] = 1;
+    }
+    if (keysDown.includes("w")) {
+        StickMans[0].speed[1] = -1;
+    }
+    if (keysDown.includes("s")) {
+        StickMans[0].speed[1] = 1;
+    }
+}
 
 function gameLoop() {
     ctx.clearRect(0, 0, c.width, c.height);
@@ -212,7 +251,7 @@ function gameLoop() {
     for (let i = 0; i < Objects.length; i++) {
         Objects[i].draw();
     }
-    console.log(keysDown)
+    handleStickMovement()
     requestAnimationFrame(gameLoop);
 }
 
