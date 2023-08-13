@@ -7,6 +7,7 @@ const pi180 = Math.PI / 180;
 
 let StickMans = []
 let Objects = []
+let keysDown = []
 
 function checkIfLinesIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
     let uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
@@ -38,8 +39,8 @@ class StickMan {
         this.color = color;
         this.x = x;
         this.y = y;
-        this.limbs = [30, 310, 250, 90]; // prawa ręka,  lewa ręka, prawa noga, lewa noga
-        this.speed = [1, 0] // speedX, speedY
+        this.limbs = [30, 310, 330, 30]; // prawa ręka,  lewa ręka, prawa noga, lewa noga
+        this.speed = [0, 1] // speedX, speedY
     }
 
     draw() {
@@ -88,7 +89,7 @@ class StickMan {
 
     checkCollision() {
 
-        collisions = []
+        let collisions = []
 
         let bodyEnd = [Math.sin((this.limbs[2] + this.limbs[3]) / 2 * pi180) * stickLength, Math.cos((this.limbs[2] + this.limbs[3]) / 2 * pi180) * -stickLength];
 
@@ -163,8 +164,30 @@ class StickMan {
     }
 
     update() {
-        console.log(this.checkCollision())
+        this.y += this.speed[1];
         this.x += this.speed[0];
+        let collisions = this.checkCollision();
+        if (collisions.length === 0) {
+            this.speed[1] += 0.01;
+        }
+        else {
+            if (collisions.length > 1){
+                this.speed[1] = 0;
+            }
+            else {
+                if (collisions[0][0] === "head"){
+                    this.speed[1] = 0;
+                } else {
+                    if (this.limbs[collisions[0][0]] > 180){
+                        this.limbs[collisions[0][0]] -= this.speed[1] * 10;
+                        this.speed[1] = 0;
+                    } else {
+                        this.limbs[collisions[0][0]] += this.speed[1] * 10;
+                        this.speed[1] = 0;
+                    }
+                }
+            }
+        }
     }
 
 }
@@ -172,9 +195,9 @@ class StickMan {
 let stick = new StickMan("red", 100, 100);
 StickMans.push(stick);
 
-let object = new Object(90, 200, 50, 50, "blue");
+let object = new Object(100, 500, 50, 50, "blue");
 Objects.push(object);
-object = new Object(200, 85, 50, 50, "blue");
+object = new Object(210, 85, 50, 50, "blue");
 Objects.push(object);
 
 
@@ -189,8 +212,22 @@ function gameLoop() {
     for (let i = 0; i < Objects.length; i++) {
         Objects[i].draw();
     }
-
+    console.log(keysDown)
     requestAnimationFrame(gameLoop);
 }
+
+document.addEventListener('keydown', function(event) {
+    if(!keysDown.includes(event.key)){
+        keysDown.push(event.key);
+    }
+});
+
+document.addEventListener('keyup', function(event) {
+    for (let i=0; i<keysDown.length; i++){
+        if (keysDown[i] === event.key){
+            keysDown.splice(i, 1);
+        }
+    }
+});
 
 gameLoop();
